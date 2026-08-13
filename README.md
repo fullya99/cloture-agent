@@ -16,7 +16,16 @@ git clone https://github.com/fullya99/cloture-agent.git \
   ~/.hermes/skills/housekeeping/cloture-agent
 ```
 
-Le skill devient une slash command au passage, Hermes expose les skills installés comme commandes.
+Le skill devient une slash command au passage, Hermes expose les skills installés comme commandes. Le
+dossier de catégorie est du rangement, pas une condition, le scan est récursif.
+
+`hermes skills install` ne marche pas ici : le scan de sécurité voit un skill qui touche à la mémoire
+et à la config de l'agent, il le classe `dangerous`, et `--force` ne lève pas ce verdict. C'est
+cohérent avec ce que fait le skill, donc le `git clone` est la voie normale et il garde le `.git` pour
+les mises à jour.
+
+Pas besoin de redémarrer. L'outil de liste voit le skill tout de suite, l'index de skills du prompt
+système est construit en début de session et ne l'affichera qu'à la suivante.
 
 **OpenClaw**
 

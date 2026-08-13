@@ -81,6 +81,21 @@ fait te tromper indéfiniment et sans bruit.
 Le test de taille est simple et il marche : **si tu ne relirais pas ce fichier en entier de bon
 cœur, il est trop gros.** Coupe.
 
+### Par l'outil ou à la main
+
+Si ta plateforme expose un outil de mémoire, passe par lui plutôt que d'éditer le fichier
+directement. Chez Hermes c'est l'outil `memory`, qui prend plusieurs opérations d'un coup et connaît
+la limite de taille du fichier, un ajout au-delà se fait refuser. Cette limite est ta friction utile,
+mais elle n'arbitre rien : elle te force à couper au moment où tu ajoutes, pas à relire ce qui est
+déjà là. Les quatre passes ci-dessus restent à ta charge.
+
+Le compactage de contexte, lui, ne purge rien. Il compresse l'historique de la conversation, pas ta
+mémoire sur disque. Ne compte pas sur lui.
+
+Et si tu as déjà une tâche périodique qui fait une introspection, un rapport du matin par exemple,
+branche la clôture dessus plutôt que d'en lancer une deuxième à côté. Deux relectures de la même
+mémoire dans la même journée, c'est du temps payé deux fois.
+
 ## Les skills que tu t'écris
 
 Une classe d'artefact que les agents de session n'ont pas. Tu en crées, tu les modifies, tu peux les

@@ -1,7 +1,7 @@
 ---
 name: cloture-agent
-description: Clôture de session pour un agent personnel permanent, Hermes Agent ou OpenClaw. À lancer avant un /new, un /reset ou un /clear, et à la fin de toute unité de travail. Synchronise les 3 piliers du projet CODEMAP.md TODOS.md CHANGELOG.md, purge et corrige la mémoire de l'agent dans MEMORY.md et USER.md, range les skills que l'agent s'est écrits tout seul, et déplace vers archives/ tout ce qui est devenu faux ou périmé. Se déclenche sur : clôture ou fin de session, "avant de faire /new", "range tout", "mets à jour ta mémoire", "fais le ménage dans tes skills", "documente ce qu'on a fait", mémoire qui enfle, skills en doublon, doc vivante, CODEMAP, TODOS, CHANGELOG.
-version: 1.1.0
+description: "Clôture de session pour un agent personnel permanent, Hermes Agent ou OpenClaw. À lancer avant un /new, un /reset ou un /clear, et à la fin de toute unité de travail. Synchronise les 3 piliers du projet CODEMAP.md TODOS.md CHANGELOG.md, purge et corrige la mémoire de l'agent dans MEMORY.md et USER.md, range les skills que l'agent s'est écrits tout seul, et déplace vers archives/ tout ce qui est devenu faux ou périmé. Se déclenche sur : clôture ou fin de session, \"avant de faire /new\", \"range tout\", \"mets à jour ta mémoire\", \"fais le ménage dans tes skills\", \"documente ce qu'on a fait\", mémoire qui enfle, skills en doublon, doc vivante, CODEMAP, TODOS, CHANGELOG."
+version: 1.2.0
 author: fullya99
 license: MIT
 platforms: [linux, macos, windows]
@@ -17,15 +17,23 @@ metadata:
 > jamais coûter une information, et une mémoire qui grossit sans être relue finit par mentir.
 
 Tu tournes en service permanent, mais ta session se remet à zéro. Chez Hermes, `/new` ouvre une
-session neuve, `/reset` vide l'historique. Chez OpenClaw, tu te réveilles à neuf à chaque session.
-Ce qui n'est pas écrit avant ce moment-là n'existe plus après.
+session neuve, `/reset` en est un alias, `/clear` fait la même chose en nettoyant l'écran. Chez
+OpenClaw, tu te réveilles à neuf à chaque session. Ce qui n'est pas écrit avant ce moment-là n'existe
+plus après.
+
+Une précision qui compte, parce qu'elle change ce que tu as à sauver. **Aucune de ces commandes ne
+touche ta mémoire sur disque.** `MEMORY.md`, `USER.md` et `SOUL.md` sont là après comme avant. Ce que
+la coupure emporte, c'est le contexte de conversation, donc tout ce qui n'a été que dit. La clôture ne
+sert pas à protéger ta mémoire d'un `/new`, elle sert à ce que le disque contienne ce que la
+conversation savait.
 
 Deux risques, pas un. Le premier est de perdre du contexte à la coupure. Le second est propre aux
 agents permanents : ta mémoire est réinjectée dans ton prompt à **chaque** appel, et rien ne la purge
 tout seul. Une mémoire qui enfle coûte des tokens à chaque tour, et une mémoire fausse coûte bien
 plus cher que ça.
 
-**Avant d'écrire quoi que ce soit**, charge le skill `style-redaction` s'il est installé. Sinon le
+**Avant d'écrire quoi que ce soit**, charge le skill de style s'il est installé. Il s'appelle
+`style-redaction-agent` chez un agent permanent et `style-redaction` chez Claude Code. Sinon le
 minimum tient en une ligne : français, ton direct, aucun tiret cadratin, aucun point-virgule, aucune
 tournure qui sent le texte généré.
 
