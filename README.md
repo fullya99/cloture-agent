@@ -68,6 +68,20 @@ toi. Le skill traque quatre défauts : la description floue qui empêche le déc
 qui rend le comportement imprévisible, le skill mort écrit pour un besoin ponctuel, et le secret
 oublié dedans alors que les skills se publient.
 
+## Plusieurs projets dans la même session
+
+C'est le cas courant chez un agent permanent, qui passe d'un projet à l'autre sans frontière visible.
+Le skill traite chaque niveau séparément.
+
+Un dossier qui porte les trois piliers est un niveau **autonome**. Un monorepo avec deux sous-projets
+équipés, ça fait trois clôtures, pas une. Le parent pointe vers ses enfants, il ne recopie pas leur
+doc, et recopier est l'erreur exacte que la convention veut éviter.
+
+L'audit le gère de deux façons. Sa section « Niveaux imbriqués » liste les dossiers en dessous qui
+portent leur propre kit, avec la commande pour chacun. Et il prévient quand tu l'as lancé depuis un
+sous-projet alors qu'il a audité le parent, ce qui arrive sans `--root` puisque la racine se déduit de
+git.
+
 ## Les modes
 
 | Mode | Quand |

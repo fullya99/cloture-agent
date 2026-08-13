@@ -1,7 +1,7 @@
 ---
 name: cloture-agent
 description: Clôture de session pour un agent personnel permanent, Hermes Agent ou OpenClaw. À lancer avant un /new, un /reset ou un /clear, et à la fin de toute unité de travail. Synchronise les 3 piliers du projet CODEMAP.md TODOS.md CHANGELOG.md, purge et corrige la mémoire de l'agent dans MEMORY.md et USER.md, range les skills que l'agent s'est écrits tout seul, et déplace vers archives/ tout ce qui est devenu faux ou périmé. Se déclenche sur : clôture ou fin de session, "avant de faire /new", "range tout", "mets à jour ta mémoire", "fais le ménage dans tes skills", "documente ce qu'on a fait", mémoire qui enfle, skills en doublon, doc vivante, CODEMAP, TODOS, CHANGELOG.
-version: 1.0.1
+version: 1.1.0
 author: fullya99
 license: MIT
 platforms: [linux, macos, windows]
@@ -136,15 +136,37 @@ depuis une supposition. Le détail est dans `references/CONVENTION.md`.
 git status -s && git diff --stat && git log --oneline -10
 ```
 
-Repère ce qui a changé, y compris hors git, et **tous les niveaux touchés**. Une session partie d'un
-sous-répertoire touche souvent au-dessus. Calibre l'effort sur la taille de la session, mais ne saute
-ni la phase 3 ni la phase 4.
+Repère ce qui a changé, y compris hors git. Calibre l'effort sur la taille de la session, mais ne
+saute ni la phase 3 ni la phase 4.
+
+**Puis repère tous les niveaux.** Tu tournes en continu et tu passes d'un projet à l'autre sans
+frontière visible, donc c'est ici que ça se perd le plus facilement. Une session peut avoir touché
+un monorepo et deux de ses sous-projets, ou trois dépôts sans rapport.
+
+```bash
+find . -mindepth 2 -name CODEMAP.md -not -path './.git/*' -not -path './archives/*' \
+  -not -path './node_modules/*' | sed 's|/CODEMAP.md$||'
+```
+
+Chaque dossier qui porte les trois piliers est un niveau **autonome**. Il se clôture séparément, avec
+son propre passage en phases 1, 2 et 5. Le parent **pointe** vers lui, il ne l'absorbe pas, et
+recopier la doc d'un sous-projet chez son parent est exactement l'erreur à ne pas faire.
+
+L'audit de la phase 1 le signale de lui-même en section « Niveaux imbriqués », et il prévient aussi
+quand tu l'as lancé depuis un sous-projet alors qu'il a audité le parent. Sans `--root`, la racine se
+déduit de git, donc elle remonte au dépôt entier.
+
+Ne documente jamais que le répertoire d'où tu es parti.
 
 ### Phase 1. Auditer le réel, sans croire la doc
 
 ```bash
-bash "$SKILL/scripts/ctx-audit.sh"
+bash "$SKILL/scripts/ctx-audit.sh"                      # le niveau courant
+bash "$SKILL/scripts/ctx-audit.sh" --root packages/api  # un niveau imbriqué
 ```
+
+**Une passe par niveau touché**, pas une seule à la racine. Le script audite un niveau à la fois, et
+sans `--root` il remonte à la racine git.
 
 Le script signale, il ne juge pas. Vérifie sur le terrain ce que la session a touché. Le service
 tourne-t-il, le chemin cité existe-t-il encore, le test passe-t-il.
@@ -162,6 +184,9 @@ correction ou un archivage. Aucun ne reste ouvert.
 
 Le bloc d'état de reprise est un **état**, pas un journal. L'histoire vit au CHANGELOG. Si le bloc
 raconte la session au lieu de dire où on en est, réécris-le.
+
+**Applique ce tableau à chaque niveau touché**, repéré en phase 0. Un sous-projet a sa propre doc
+vivante et son propre bloc d'état de reprise. Le parent gagne au mieux une ligne qui pointe vers lui.
 
 ### Phase 3. Ta mémoire, phase propre aux agents permanents
 
@@ -219,6 +244,7 @@ se supprime, une règle erronée est pire qu'une règle absente. Le détail est 
 
 ### Phase 6. Test « prêt pour /new »
 
+- [ ] **Chaque niveau touché** a eu sa passe, pas seulement celui d'où tu es parti.
 - [ ] Les 3 piliers reflètent l'état vérifié en phase 1, sans se contredire.
 - [ ] Le bloc d'état de reprise de `TODOS.md` permet de repartir sans cette conversation.
 - [ ] Tout travail en cours non fini a une tâche écrite.
@@ -234,6 +260,7 @@ se supprime, une règle erronée est pire qu'une règle absente. Le détail est 
 
 Fait : [1 à 3 lignes factuelles]
 
+Niveaux  : [chemin de chaque niveau clôturé, un par un]
 Projet   : CHANGELOG ✓ · CODEMAP ✓ · TODOS ✓ · docs/ +[N] ~[N] · archives/ [N]
 Mémoire  : MEMORY.md [N corrigés, N supprimés, N déplacés vers le projet] · USER.md [ce qui bouge]
 Skills   : [N créés, N fusionnés, N supprimés] ou « rien touché »
