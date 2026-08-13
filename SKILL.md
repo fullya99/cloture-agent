@@ -1,7 +1,7 @@
 ---
 name: cloture-agent
 description: Clôture de session pour un agent personnel permanent, Hermes Agent ou OpenClaw. À lancer avant un /new, un /reset ou un /clear, et à la fin de toute unité de travail. Synchronise les 3 piliers du projet CODEMAP.md TODOS.md CHANGELOG.md, purge et corrige la mémoire de l'agent dans MEMORY.md et USER.md, range les skills que l'agent s'est écrits tout seul, et déplace vers archives/ tout ce qui est devenu faux ou périmé. Se déclenche sur : clôture ou fin de session, "avant de faire /new", "range tout", "mets à jour ta mémoire", "fais le ménage dans tes skills", "documente ce qu'on a fait", mémoire qui enfle, skills en doublon, doc vivante, CODEMAP, TODOS, CHANGELOG.
-version: 1.0.0
+version: 1.0.1
 author: fullya99
 license: MIT
 platforms: [linux, macos, windows]
@@ -108,13 +108,19 @@ bash "$SKILL/scripts/ctx-init.sh"             # créer, sans jamais écraser
 chemin relatif ne résout pas. Résous-le une fois :
 
 ```bash
-SKILL="$(for d in "$HOME/.openclaw/workspace/skills/cloture-agent" \
-  $(find "$HOME/.hermes/skills" -maxdepth 3 -type d -name cloture-agent 2>/dev/null) \
-  $(find "$HOME/.openclaw" -maxdepth 4 -type d -name cloture-agent 2>/dev/null); do
+SKILL="$(for d in \
+  $(find "$HOME/.hermes/skills" "$HOME/.openclaw" -maxdepth 4 -type d -name cloture-agent 2>/dev/null) \
+  $(find skills -maxdepth 2 -type d -name cloture-agent 2>/dev/null) \
+  "$HOME/.claude/skills/cloture-agent"; do
   [ -f "$d/scripts/ctx-audit.sh" ] && echo "$d" && break
 done)"
 [ -n "$SKILL" ] || echo "skill introuvable, fais les etapes a la main sans le script"
 ```
+
+Le premier `find` couvre Hermes, `~/.hermes/skills/` avec ou sans catégorie, et OpenClaw à son
+emplacement par défaut. Le second est relatif et sert quand le workspace OpenClaw a été déplacé par
+`agents.defaults.workspace` : ce workspace est le seul répertoire de travail de l'agent, donc
+`skills/<nom>/` y résout depuis le cwd quel que soit son emplacement réel.
 
 Le script pose des gabarits vides. Le travail commence après. Lis le projet avant d'écrire,
 arborescence, points d'entrée, fichier de build, CI, derniers commits. Ne remplis jamais le CODEMAP
