@@ -17,15 +17,41 @@ git clone https://github.com/fullya99/cloture-agent.git \
 ```
 
 Le skill devient une slash command au passage, Hermes expose les skills installés comme commandes. Le
-dossier de catégorie est du rangement, pas une condition, le scan est récursif.
-
-`hermes skills install` ne marche pas ici : le scan de sécurité voit un skill qui touche à la mémoire
-et à la config de l'agent, il le classe `dangerous`, et `--force` ne lève pas ce verdict. C'est
-cohérent avec ce que fait le skill, donc le `git clone` est la voie normale et il garde le `.git` pour
-les mises à jour.
+dossier de catégorie est du rangement, pas une condition, le scan est récursif. Les mises à jour se
+font par `git pull`.
 
 Pas besoin de redémarrer. L'outil de liste voit le skill tout de suite, l'index de skills du prompt
 système est construit en début de session et ne l'affichera qu'à la suivante.
+
+### L'installation officielle est impossible, et c'est normal
+
+`hermes skills install` refuse ce skill, et ce n'est pas contournable. Vérifié le 2026-08-13 sur une
+installation réelle :
+
+```
+Decision: BLOCKED - Blocked (community source + dangerous verdict, 27 findings).
+--force does not override a dangerous verdict.
+rules: agent_config_mod, hermes_config_mod
+```
+
+Ni `--force`, ni `--yolo`, ni l'ajout du dépôt aux dépôts de confiance ne lèvent un verdict
+`dangerous`. Il n'y a aucun réglage utilisateur pour ça.
+
+Le scanner ne se trompe pas. Ce skill dit à l'agent de relire et de corriger sa mémoire, et ses
+scripts écrivent des fichiers de contexte. C'est exactement la signature qu'un scanner d'installation
+cherche, parce que c'est la signature d'une attaque par empoisonnement de mémoire : l'entrée AST01 de
+l'OWASP Agentic Skills Top 10 cite l'injection dans `MEMORY.md` comme le premier cas de skill
+malveillant. En février 2026, l'audit ToxicSkills de Snyk a trouvé un défaut de sécurité dans 36% de
+3 984 skills publics, et la campagne ClawHavoc a placé 341 skills malveillants sur ClawHub, soit 12%
+du catalogue de l'époque.
+
+Un skill de clôture qui range la mémoire de l'agent ne passera donc jamais une installation
+officielle, sur aucune plateforme sérieuse. Le `git clone` ci-dessus est la voie normale, pas un
+pis-aller : c'est un outil personnel qui touche à ta mémoire, tu l'installes en le lisant, pas en
+faisant confiance à un catalogue.
+
+Son voisin `style-redaction-agent`, qui n'écrit que du texte que tu lui demandes, passe le scan sans
+problème et s'installe officiellement.
 
 **OpenClaw**
 
