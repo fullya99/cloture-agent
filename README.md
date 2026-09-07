@@ -72,6 +72,32 @@ cp -r . ~/.claude/skills/cloture-agent
 Il y a une version dédiée à Claude Code, `cloture-session`, avec ses trois slash commands. Celle-ci
 apporte en plus le rangement de la mémoire de l'agent, qui n'existe pas là-bas.
 
+## Ce que fait la 2.0.0
+
+Une doc vraie mais trop longue est une doc perdue. Sur un projet réel de 979 fichiers, après 83
+clôtures, le bloc de reprise faisait 2 579 lignes et le CHANGELOG 8 283. Rien ne poussait à
+retirer. La 2.0.0 pose le budget comme second invariant, au même rang que le vrai.
+
+- **Un budget par surface**, mesuré par `ctx-audit.sh --budget`. Une clôture n'est pas finie tant
+  qu'un fichier dépasse son seuil de blocage.
+- **Un bloc de reprise réécrit**, jamais édité, borné à 40 lignes. Ce qui en sort a un
+  propriétaire : événement au CHANGELOG, piège dans une fiche, tâche dans TODOS.
+- **Un journal qui tourne.** `ctx-rotation.sh` déplace les entrées anciennes du CHANGELOG vers
+  `archives/`, par mois, sans rien coûter à la reprise.
+- **Des cartes de zone** sur les gros projets. Un répertoire qui le mérite reçoit son propre
+  `CODEMAP.md`, et au besoin un `CLAUDE.md` de zone que seuls Claude Code et Codex chargent tout
+  seuls. Ailleurs, rien ne le charge, la carte est donc la partie portable de la zone.
+- **Un chemin vers les archives.** `archives/` ne se lit jamais en reprise, mais sur demande
+  explicite d'archéologie `ctx-archeo.sh` rend la provenance avant l'extrait, sortie bornée. Sans
+  lui, ne jamais lire les archives reviendrait à perdre ce qu'on prétend garder.
+
+| Surface | Cible |
+|---|---|
+| `CLAUDE.md` ou `AGENTS.md` racine | 100 lignes |
+| `CODEMAP.md` racine | 250 lignes |
+| bloc « État à la reprise » | 40 lignes |
+| `CHANGELOG.md` | 30 entrées |
+
 ## Ce qu'il fait
 
 **Côté projet**, il maintient trois fichiers à la racine du dépôt sur lequel tu travailles.
@@ -117,6 +143,22 @@ portent leur propre kit, avec la commande pour chacun. Et il prévient quand tu 
 sous-projet alors qu'il a audité le parent, ce qui arrive sans `--root` puisque la racine se déduit de
 git.
 
+## Se greffer sur un projet existant
+
+L'INIT ne pose jamais de gabarits vides à côté d'une doc qui existe déjà. Il détecte le terrain et
+l'annonce avant d'écrire.
+
+| Ce que le projet a déjà | Ce que le skill en fait |
+|---|---|
+| Rien, ou presque rien | Le kit se pose, tu remplis depuis le code réel |
+| `doc/`, `documentation/`, `adr/` | Il adopte et déclare les vrais chemins |
+| `AGENTS.md` sans `CLAUDE.md` | Il y écrit, `AGENTS.md` reste le porteur des règles |
+| `memory-bank/`, `.clinerules`, `.cursor/rules` | Une seule question tranche qui fait foi, l'autre part en archives |
+| `MEMORY.md` de projet | Son contenu se répartit chez les propriétaires, décisions en ADR, pièges dans les fiches |
+| Documentation déjà abondante | La greffe est une clôture, pas une installation |
+
+Dans tous les cas il ne touche jamais un fichier existant.
+
 ## Les modes
 
 | Mode | Quand |
@@ -131,10 +173,19 @@ partie projet et dit qu'il saute la partie mémoire, plutôt que d'inventer des 
 ## Les scripts, utilisables seuls
 
 ```bash
-bash scripts/ctx-init.sh --dry-run   # voir ce qui serait créé
-bash scripts/ctx-init.sh             # créer, sans jamais écraser un fichier existant
-bash scripts/ctx-audit.sh            # rapport de dérive entre la doc et le dépôt
-bash scripts/ctx-audit.sh --strict   # sortie non nulle s'il reste une alerte, pour la CI
+bash scripts/ctx-init.sh --dry-run    # voir ce qui serait créé
+bash scripts/ctx-init.sh              # créer, sans jamais écraser un fichier existant
+bash scripts/ctx-init.sh --zone <dir> # poser la carte d'une zone
+bash scripts/ctx-audit.sh             # rapport de dérive entre la doc et le dépôt
+bash scripts/ctx-audit.sh --budget    # mesurer le budget de chaque surface
+bash scripts/ctx-audit.sh --strict    # sortie non nulle s'il reste une alerte, pour la CI
+bash scripts/ctx-rotation.sh --dry-run   # voir ce que la rotation du CHANGELOG déplacerait
+bash scripts/ctx-rotation.sh             # déplacer les entrées froides vers archives/
+bash scripts/ctx-archive.sh --verifier <chemin>                        # classer les références entrantes
+bash scripts/ctx-archive.sh <chemin> --raison "..." --remplace-par "..." # archiver en une passe
+bash scripts/ctx-archeo.sh <motif>          # chercher dans archives/, provenance puis extrait
+bash scripts/ctx-archeo.sh --liste          # inventaire de ce qui est archivé
+bash scripts/ctx-archeo.sh --fichier <chemin> # provenance d'une archive précise
 ```
 
 Bash et git suffisent. Aucune dépendance, aucun serveur MCP.
